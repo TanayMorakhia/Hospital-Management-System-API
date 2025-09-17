@@ -11,6 +11,7 @@ import com.hms.api.dto.PatientLoginDTO;
 import com.hms.api.dto.PatientRegisterDTO;
 import com.hms.api.dto.PatientResponseDTO;
 import com.hms.api.services.PatientService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/patient")
@@ -30,11 +31,13 @@ public class PatientController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
     public ResponseEntity<PatientResponseDTO> getById(@PathVariable String id){
         return ResponseEntity.ok(patientService.getById(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PatientResponseDTO>> listAll(){
         return ResponseEntity.ok(patientService.listAll());
     }

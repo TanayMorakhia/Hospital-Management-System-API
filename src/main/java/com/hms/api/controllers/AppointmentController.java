@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.hms.api.dto.AppointmentCreateDTO;
 import com.hms.api.models.Appointment;
 import com.hms.api.services.AppointmentService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/appointment")
@@ -18,11 +19,13 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Appointment>> listAll(){
         return ResponseEntity.ok(appointmentService.listAll());
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or #dto.patientId == authentication.name")
     public ResponseEntity<Appointment> create(@RequestBody AppointmentCreateDTO dto){
         Appointment a = appointmentService.create(dto);
         return new ResponseEntity<>(a, HttpStatus.CREATED);
@@ -39,6 +42,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/patient/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #patientId == authentication.name")
     public ResponseEntity<List<Appointment>> getByPatient(@PathVariable("id") String patientId){
         return ResponseEntity.ok(appointmentService.getByPatient(patientId));
     }
