@@ -1,30 +1,19 @@
-package com.hms.api.models;
+package com.hms.api.dto;
 
-import com.hms.api.util.CustomId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Entity
 @NoArgsConstructor
-public class Patient {
-
-    @Id
-    @CustomId
+@AllArgsConstructor
+public class PatientResponseDTO {
     private String id;
-
     private String name;
-
     private String email;
-
     private String contact;
-
     private String address;
-
     private String gender;
-
-    private String password;
 }
+
+

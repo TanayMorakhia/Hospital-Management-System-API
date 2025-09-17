@@ -18,6 +18,8 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     List<TimeSlot> findByDoctorIdAndSlotDateAndStatusOrderByStartTimeAsc(
         String doctorId, LocalDate date, SlotStatus status);
 
+    List<TimeSlot> findByDoctorIdOrderBySlotDateAscStartTimeAsc(String doctorId);
+
     @Query("SELECT ts FROM TimeSlot ts WHERE ts.doctor.id = :doctorId " +
            "AND ts.slotDate BETWEEN :startDate AND :endDate " +
            "AND ts.status = :status ORDER BY ts.slotDate, ts.startTime")

@@ -9,10 +9,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "time_slots", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"doctor_id", "start_time"})
+    @UniqueConstraint(columnNames = {"doctor_id", "slot_date", "start_time"})
 })
 @Data
 @NoArgsConstructor
@@ -23,6 +24,7 @@ public class TimeSlot {
 
     @ManyToOne
     @JoinColumn(name = "doctor_id")
+    @JsonBackReference
     private Doctor doctor;
 
     @Column(name = "slot_date")

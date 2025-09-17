@@ -1,27 +1,22 @@
 package com.hms.api.dto;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DoctorCreationDTO {
+public class DoctorResponseDTO {
+    private String id;
     private String name;
-
     private String department;
-
     private String gender;
-
-    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     private LocalTime startTime;
-
-    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     private LocalTime endTime;
-
-    private boolean isActive = true;
+    private boolean active;
 }
+
+

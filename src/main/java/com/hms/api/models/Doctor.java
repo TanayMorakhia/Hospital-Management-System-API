@@ -2,12 +2,15 @@ package com.hms.api.models;
 
 import static org.hibernate.annotations.CascadeType.ALL;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CascadeType;
 
 import com.hms.api.util.CustomId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -16,31 +19,41 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class Doctor {
 
     @CustomId
     @Id
-    String id;
+    private String id;
 
-    String name;
+    private String name;
 
-    String department;
+    private String department;
 
-    String gender;
+    private String gender;
 
-    public Doctor(String name, String department, String gender){
+    private boolean isActive;
+
+
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
+
+    public Doctor(String name, String department, String gender, LocalTime startTime, LocalTime endTime, boolean isActive){
         this.name = name;
         this.department = department;
         this.gender = gender;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isActive = isActive;
     }
 
     @OneToMany(mappedBy = "doctor", cascade = jakarta.persistence.CascadeType.ALL)
-    private List<DoctorSchedule> schedules = new ArrayList<>();
-
-    @OneToMany(mappedBy = "doctor", cascade = jakarta.persistence.CascadeType.ALL)
+    @JsonIgnore
     private List<TimeSlot> timeSlots = new ArrayList<>();
 }

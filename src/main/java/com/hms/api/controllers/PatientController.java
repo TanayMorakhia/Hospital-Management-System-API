@@ -1,21 +1,41 @@
 package com.hms.api.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.hms.api.repositories.PatientRepository;
-import com.hms.api.models.Patient;
+import com.hms.api.dto.PatientLoginDTO;
+import com.hms.api.dto.PatientRegisterDTO;
+import com.hms.api.dto.PatientResponseDTO;
+import com.hms.api.services.PatientService;
 
 @RestController
-@RequestMapping("/patient")
+@RequestMapping("/api/patient")
 public class PatientController {
 
     @Autowired
-    private PatientRepository patientRepository;
+    private PatientService patientService;
 
-    @PostMapping
-    public Patient savePatients(@RequestBody Patient patient){
-        Patient temp = patientRepository.save(patient);
-        return temp;
+    @PostMapping("/register")
+    public ResponseEntity<PatientResponseDTO> register(@RequestBody PatientRegisterDTO dto){
+        return new ResponseEntity<>(patientService.register(dto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<PatientResponseDTO> login(@RequestBody PatientLoginDTO dto){
+        return ResponseEntity.ok(patientService.login(dto));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PatientResponseDTO> getById(@PathVariable String id){
+        return ResponseEntity.ok(patientService.getById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PatientResponseDTO>> listAll(){
+        return ResponseEntity.ok(patientService.listAll());
     }
 }

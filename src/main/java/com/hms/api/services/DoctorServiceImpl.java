@@ -14,7 +14,20 @@ public class DoctorServiceImpl implements DoctorService{
     private DoctorRepository doctorRepository;
 
     public Doctor saveDoctor(DoctorCreationDTO doctorDTO){
-        Doctor doctor = new Doctor(doctorDTO.getName(), doctorDTO.getGender(), doctorDTO.getDepartment());
+        Doctor doctor = new Doctor(
+            doctorDTO.getName(),
+            doctorDTO.getDepartment(),
+            doctorDTO.getGender(),
+            doctorDTO.getStartTime(),
+            doctorDTO.getEndTime(),
+            doctorDTO.isActive()
+        );
         return doctorRepository.save(doctor);
+    }
+
+    public void deactivateDoctor(String doctorId){
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
+        doctor.setActive(false);
+        doctorRepository.save(doctor);
     }
 }

@@ -1,6 +1,5 @@
 package com.hms.api.services;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -10,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hms.api.models.Doctor;
-import com.hms.api.models.DoctorSchedule;
 import com.hms.api.models.SlotStatus;
 import com.hms.api.models.TimeSlot;
 import com.hms.api.repositories.TimeSlotRepository;
-import com.hms.api.repositories.DoctorScheduleRepository;
+import com.hms.api.repositories.DoctorRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Service
 @Transactional
@@ -24,37 +23,39 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
     private TimeSlotRepository timeSlotRepository;
 
     @Autowired
-    private DoctorScheduleRepository scheduleRepository;
+    private DoctorRepository doctorRepository;
 
     private static final int SLOT_DURATION_MINUTES = 30;
-    private static final int FUTURE_DAYS_TO_GENERATE = 90; // 3 months ahead
+    private static final int FUTURE_DAYS_TO_GENERATE = 60; // 3 months ahead
 
     /**
      * Generate time slots for a doctor based on their schedule
      */
     public void generateTimeSlots(String doctorId) {
-        List<DoctorSchedule> schedules = scheduleRepository.findByDoctorIdAndIsActiveTrue(doctorId);
-
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(FUTURE_DAYS_TO_GENERATE);
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            DayOfWeek dayOfWeek = date.getDayOfWeek();
-
-            // Find schedule for this day of week
-            LocalDate finalDate = date;
-            schedules.stream()
-                    .filter(schedule -> schedule.getDayOfWeek().equals(dayOfWeek))
-                    .forEach(schedule -> createTimeSlotsForDay(doctorId, finalDate, schedule));
+            createTimeSlotsForDay(doctor, date);
         }
+    }
+
+    public void generateTimeSlotsForAllDoctors() {
+        doctorRepository.findAll().forEach(doc -> generateTimeSlots(doc.getId()));
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void dailySlotGeneration() {
+        generateTimeSlotsForAllDoctors();
     }
 
     /**
      * Create time slots for a specific day
      */
-    private void createTimeSlotsForDay(String doctorId, LocalDate date, DoctorSchedule schedule) {
-        LocalTime currentTime = schedule.getStartTime();
-        LocalTime endTime = schedule.getEndTime();
+    private void createTimeSlotsForDay(Doctor doctor, LocalDate date) {
+        LocalTime currentTime = doctor.getStartTime();
+        LocalTime endTime = doctor.getEndTime();
 
         while (currentTime.isBefore(endTime)) {
             LocalTime slotEndTime = currentTime.plusMinutes(SLOT_DURATION_MINUTES);
@@ -65,9 +66,9 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
             }
 
             // Check if slot already exists
-            if (!timeSlotRepository.existsByDoctorIdAndSlotDateAndStartTime(doctorId, date, currentTime)) {
+            if (!timeSlotRepository.existsByDoctorIdAndSlotDateAndStartTime(doctor.getId(), date, currentTime)) {
                 TimeSlot slot = new TimeSlot();
-                slot.setDoctor(new Doctor()); // You might want to fetch the actual doctor
+                slot.setDoctor(doctor);
                 slot.setSlotDate(date);
                 slot.setStartTime(currentTime);
                 slot.setEndTime(slotEndTime);
@@ -103,6 +104,9 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
 
         if (slotOpt.isPresent() && slotOpt.get().getStatus() == SlotStatus.AVAILABLE) {
             TimeSlot slot = slotOpt.get();
+            if (slot.getSlotDate().isAfter(LocalDate.now().plusDays(FUTURE_DAYS_TO_GENERATE))) {
+                throw new IllegalArgumentException("Cannot book beyond 60 days from today");
+            }
             slot.setStatus(SlotStatus.BOOKED);
             timeSlotRepository.save(slot);
             return true;
@@ -110,27 +114,4 @@ public class DoctorAvailabilityServiceImpl implements DoctorAvailabilityService 
         return false;
     }
 
-    /**
-     * Update doctor's schedule and regenerate future slots
-     */
-    public void updateDoctorSchedule(String doctorId, List<DoctorSchedule> newSchedules) {
-        // Deactivate existing schedules
-        List<DoctorSchedule> existingSchedules = scheduleRepository.findByDoctorIdAndIsActiveTrue(doctorId);
-        existingSchedules.forEach(schedule -> schedule.setIsActive(false));
-        scheduleRepository.saveAll(existingSchedules);
-
-        // Save new schedules
-//        newSchedules.forEach(schedule -> {
-//            schedule.setDoctor(new Doctor(doctorId));
-//            schedule.setIsActive(true);
-//        });
-        scheduleRepository.saveAll(newSchedules);
-
-        // Remove future available slots (keep booked ones)
-        LocalDate today = LocalDate.now();
-        // This would require a custom query to delete only AVAILABLE slots from today onwards
-
-        // Regenerate slots
-        generateTimeSlots(doctorId);
-    }
 }
