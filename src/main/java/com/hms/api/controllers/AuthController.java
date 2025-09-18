@@ -21,8 +21,7 @@ public class AuthController {
     @Autowired private AdminRepository adminRepository;
     @Autowired private PatientRepository patientRepository;
     @Autowired private BCryptPasswordEncoder encoder;
-
-    private final JwtUtil jwt = new JwtUtil();
+    @Autowired private JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody PatientLoginDTO dto){
@@ -30,7 +29,7 @@ public class AuthController {
 
         Admin admin = adminRepository.findByEmail(dto.getEmail()).orElse(null);
         if (admin != null && encoder.matches(dto.getPassword(), admin.getPassword())){
-            String token = jwt.generateToken(admin.getId(), "ADMIN", Map.of("email", admin.getEmail()));
+            String token = jwtUtil.generateToken(admin.getId(), "ADMIN", Map.of("email", admin.getEmail()));
             res.put("role", "ADMIN");
             res.put("id", admin.getId());
             res.put("token", token);
@@ -39,7 +38,7 @@ public class AuthController {
 
         Patient patient = patientRepository.findByEmail(dto.getEmail()).orElse(null);
         if (patient != null && encoder.matches(dto.getPassword(), patient.getPassword())){
-            String token = jwt.generateToken(patient.getId(), "PATIENT", Map.of("email", patient.getEmail()));
+            String token = jwtUtil.generateToken(patient.getId(), "PATIENT", Map.of("email", patient.getEmail()));
             res.put("role", "PATIENT");
             res.put("id", patient.getId());
             res.put("token", token);

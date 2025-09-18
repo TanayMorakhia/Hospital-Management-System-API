@@ -14,6 +14,9 @@ public class DoctorResponseDTO {
     private String name;
     private String department;
     private String gender;
+    private String qualification;
+    private Integer yearsOfExperience;
+    private Double price;
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean active;

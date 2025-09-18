@@ -17,6 +17,12 @@ public class DoctorCreationDTO {
 
     private String gender;
 
+    private String qualification;
+
+    private Integer yearsOfExperience;
+
+    private Double price;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     private LocalTime startTime;
 

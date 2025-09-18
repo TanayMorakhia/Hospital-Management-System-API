@@ -55,6 +55,9 @@ public class DoctorController {
                 d.getName(),
                 d.getDepartment(),
                 d.getGender(),
+                d.getQualification(),
+                d.getYearsOfExperience(),
+                d.getPrice(),
                 d.getStartTime(),
                 d.getEndTime(),
                 d.isActive()
@@ -86,6 +89,4 @@ public class DoctorController {
     public ResponseEntity<List<TimeSlot>> getFullSchedule(@PathVariable String doctorId){
         return ResponseEntity.ok(timeSlotRepository.findByDoctorIdOrderBySlotDateAscStartTimeAsc(doctorId));
     }
-
-    // schedule management removed; generation is automatic
 }

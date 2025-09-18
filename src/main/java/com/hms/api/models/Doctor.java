@@ -35,6 +35,12 @@ public class Doctor {
 
     private String gender;
 
+    private String qualification;
+
+    private Integer yearsOfExperience;
+
+    private Double price;
+
     private boolean isActive;
 
 
@@ -44,10 +50,13 @@ public class Doctor {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-    public Doctor(String name, String department, String gender, LocalTime startTime, LocalTime endTime, boolean isActive){
+    public Doctor(String name, String department, String gender, String qualification, Integer yearsOfExperience, Double price, LocalTime startTime, LocalTime endTime, boolean isActive){
         this.name = name;
         this.department = department;
         this.gender = gender;
+        this.qualification = qualification;
+        this.yearsOfExperience = yearsOfExperience;
+        this.price = price;
         this.startTime = startTime;
         this.endTime = endTime;
         this.isActive = isActive;

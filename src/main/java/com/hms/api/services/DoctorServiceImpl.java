@@ -18,6 +18,9 @@ public class DoctorServiceImpl implements DoctorService{
             doctorDTO.getName(),
             doctorDTO.getDepartment(),
             doctorDTO.getGender(),
+            doctorDTO.getQualification(),
+            doctorDTO.getYearsOfExperience(),
+            doctorDTO.getPrice(),
             doctorDTO.getStartTime(),
             doctorDTO.getEndTime(),
             doctorDTO.isActive()
